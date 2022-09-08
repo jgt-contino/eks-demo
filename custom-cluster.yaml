@@ -1,0 +1,35 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: jgt-eks
+  region: us-east-1
+  version: "1.23"
+
+iam:
+  withOIDC: true
+  serviceAccounts:
+    - metadata:
+        name: jgt-eks
+      wellKnownPolicies:
+        autoScaler: true
+        awsLoadBalancerController: true
+        externalDNS: true
+        ebsCSIController: true
+
+nodeGroups:
+  - name: ng-1
+    instanceType: m5.xlarge
+    desiredCapacity: 3
+    ssh:
+      allow: true
+    tags:
+      # EC2 tags required for cluster-autoscaler auto-discovery
+      k8s.io/cluster-autoscaler/enabled: "true"
+      k8s.io/cluster-autoscaler/jgt-eks: "owned"
+
+cloudWatch:
+  clusterLogging:
+    enableTypes:
+      - "all"
+    logRetentionInDays: 60
